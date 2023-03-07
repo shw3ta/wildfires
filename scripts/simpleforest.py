@@ -33,7 +33,7 @@ class square_forest:
 			self.cells[tree[0], tree[1]] = 1
 
 
-##############################################################################
+#-------------------------------------------------------------------------------
 
 ##################
 # Test functions #
@@ -112,7 +112,8 @@ def simulate_one_fire(dim):
 	# start and spread
 	spread(get_valid_neighbours(fire_at, dim), forest, dim)
 
+#----------------------------------------------------------------------------
 
-
-simulate_one_fire(14)
+dim = int(input("\nEnter the dimension of the forest you want to simulate: "))
+simulate_one_fire(dim)
 ###################################################################################
