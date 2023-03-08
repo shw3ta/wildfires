@@ -42,6 +42,14 @@ class square_forest:
 
 
 def init_forest(dim):	
+	"""Create a forest as a grid of dim x dim size. 
+    
+    Input:
+    dim (int): dimension of the forest grid.
+    
+    Output:
+    dim x dim forest grid with randomly planted trees."""
+    
 	forest = np.zeros((dim, dim))
 	n_trees = np.random.randint(dim * dim)
 
