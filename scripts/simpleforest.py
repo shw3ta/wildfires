@@ -17,17 +17,13 @@ class square_forest:
 	
 	def init_cells(self):
 		# random init with some number of trees; upper limit = dim * dim
-		n_trees = np.random.randint(self.dim * self.dim)
+		n_max = np.random.randint(self.dim * self.dim) 
 
-		loc_trees = []
-		for i in range(n_trees):
+		loc_trees = set()
+		for i in range(n_max):
 			coords = tuple(np.random.randint(self.dim, size=2))
-			# print(f"tree {i+1} of {n_trees} spawned")
-			if coords not in loc_trees:
-				loc_trees.append(coords)
-			# else:
-			# 	print("again ")
-			# print(f"at {coords}")
+			loc_trees.add(coords)
+			
 		
 		for tree in loc_trees:
 			self.cells[tree[0], tree[1]] = 1
@@ -40,27 +36,26 @@ class square_forest:
 ##################
 
 
-
 def init_forest(dim):	
 	forest = np.zeros((dim, dim))
 	n_trees = np.random.randint(dim * dim)
 
-	loc_trees = []
+	loc_trees = set()
 	for i in range(n_trees):
 		coords = np.random.randint(dim, size=2)
-		loc_trees.append(coords)
+		loc_trees.add(tuple(coords))
 		
 	
 	for tree in loc_trees:
 		forest[tree[0], tree[1]] = 1
 
-	print("\n Here is the final forest config:\n", forest)
+	print("\n Here is the initial forest config:\n", forest)
 	return forest
 
 
-def get_valid_neighbours(cell, dim):
+def get_valid_neighbours(cell, forest, dim):
+	print("\nEntered get_valid_neighbours()")
 	
-
 	row, col = cell[0], cell[1]
 	if row < 0 : 
 		raise Exception("negative row index encountered")
@@ -75,45 +70,72 @@ def get_valid_neighbours(cell, dim):
 		raise Exception("column index out of dimension bounds")
 
 	else:
+
 		neighbours = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
-	
-		# validation
-		for i, neighbour in enumerate(neighbours):
-			if neighbour[0] < 0 or neighbour[1] < 0 or neighbour[0] == dim or neighbour[1] == dim: 
-				# top, bottom, left, right edges
+		print("\n -- adjacent cells indices are: ", neighbours)
+
+
+		for i, (r, c) in enumerate(neighbours):
+			if r < 0 or c < 0 or r == dim or c == dim:
+				neighbours[i] = None
+			elif forest[r, c] != 1 :
 				neighbours[i] = None
 
-		return neighbours
+		print("\n -- after None-ifying non tree cells and invalid edge cases: ", neighbours)
+
+		valid_neighbours = []
+		for n in neighbours:
+			if n != None:
+				valid_neighbours.append(n)
+
+		print("\n Final valid list: ", valid_neighbours)
+		return valid_neighbours
 
 
 def pick_fire_location(dim):
 	return np.random.randint(dim, size=2)
 
-def spread(valid_neighbours, forest, dim):
 
-	for nb in valid_neighbours:
-		if nb != None and forest[nb[0], nb[1]] == 1 :
-			forest[nb[0], nb[1]] = 2 
-			print("\n", forest)
-			# then call spread on this cell
-			spread(get_valid_neighbours(nb, dim), forest, dim)
-			forest[nb[0], nb[1]] = 0 # 2 -> 0 i.e fire then dead
-			print("\n", forest)
 
+def spread_to(valid_neighbours, forest, dim, burnt):
+
+	print("\n---------------------------\nThe next degree neighbours are at: ", valid_neighbours)
+	
+	# now we burn all of them:
+	for (row, col) in valid_neighbours:
+		# decimate: first set to 2
+		forest[row, col] = 2
+		burnt.append((row, col))
+	print("\n incendio \n", forest)
+
+	# spread to second degree neighbours
+	for cell in valid_neighbours:
+		next_neighbours = get_valid_neighbours(cell, forest, dim)
+		if len(next_neighbours) != 0: # i.e has somewhere to spread to
+			spread_to(next_neighbours, forest, dim, burnt)
+
+	print("\n----------DONE RECURSING---------")
 
 def simulate_one_fire(dim):
 	forest = init_forest(dim)
 	fire_at = pick_fire_location(dim)
+	burnt = []
 
-	# 0 means empty cell, 1 means cell had a tree
+	# 0 means empty cell, 1 means cell has a tree
 	forest[fire_at[0], fire_at[1]] = 2 
-	print("\n", forest)
+	print(f"\n fire started at {fire_at}: \n", forest)
+	burnt.append(fire_at)	
 
 	# start and spread
-	spread(get_valid_neighbours(fire_at, dim), forest, dim)
+	neighbours = get_valid_neighbours(fire_at, forest, dim)
+	spread_to(neighbours, forest, dim, burnt)
 
+	# go to all burnt sites and set them to 0 at the end of one spread.
+	for (r, c) in burnt:
+		forest[r, c] = 0
+
+	print("\n After the damage:\n ", forest)
 #----------------------------------------------------------------------------
 
 dim = int(input("\nEnter the dimension of the forest you want to simulate: "))
 simulate_one_fire(dim)
-###################################################################################
