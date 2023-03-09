@@ -1,35 +1,13 @@
 import numpy as np
-import math
+from datetime import datetime
+
+# file to store outputs, in sequential order for now
+file = open("log_prelim.txt", "a+")
+
 
 # basic square forest
 # each cell has 3 possible states: 0, 1, 2 corresponding to empty, tree, fire
 
-# this class is not done, I keep adding properties after testing them out individually
-class square_forest:
-	# ideally evolves till full destruction, but we set a hard limit on time
-
-	def __init__(self):
-		self.dim = 0 
-		self.cells = np.zeros((self.dim, self.dim))
-
-	def set_dim(self):
-		self.dim = int(input("\nEnter dimension of your square forest: "))
-	
-	def init_cells(self):
-		# random init with some number of trees; upper limit = dim * dim
-		n_max = np.random.randint(self.dim * self.dim) 
-
-		loc_trees = set()
-		for i in range(n_max):
-			coords = tuple(np.random.randint(self.dim, size=2))
-			loc_trees.add(coords)
-			
-		
-		for tree in loc_trees:
-			self.cells[tree[0], tree[1]] = 1
-
-
-#-------------------------------------------------------------------------------
 
 ##################
 # Test functions #
@@ -125,8 +103,16 @@ def spread_to(valid_neighbours, forest, dim, burnt):
 	print("\n----------DONE RECURSING---------")
 
 def simulate_one_fire(dim):
+	'''
+	at the moment, this inits the forest, but ideally, it should inherit a forest instance where multiple fires can occur following the frequency parameter
+
+	collects/returns area information as a diagnostic, should put it into a file with simulation number and details of the simulation
+	'''
 	forest = init_forest(dim)
+	file.write(f"\nEntry time: {datetime.now()}\nInitial config: {forest}")
+	
 	fire_at = pick_fire_location(dim)
+	file.write(f"\nFire started at: {fire_at}")
 	burnt = []
 
 	# 0 means empty cell, 1 means cell has a tree
@@ -143,7 +129,13 @@ def simulate_one_fire(dim):
 		forest[r, c] = 0
 
 	print("\n After the damage:\n ", forest)
+	area_burnt = len(burnt) # in cells; assuming one cell == one square unit of area
+	# print(f"\nArea burnt in this fire: {area_burnt} sq. units.\n")
+
+	return area_burnt
 #----------------------------------------------------------------------------
 
 dim = int(input("\nEnter the dimension of the forest you want to simulate: "))
-simulate_one_fire(dim)
+damage = simulate_one_fire(dim)
+
+file.write(f"\nArea burnt: {damage} sq. units")
