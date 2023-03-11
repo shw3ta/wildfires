@@ -13,6 +13,8 @@ file = open("log_prelim.txt", "a+")
 # Test functions #
 ##################
 
+#grid_collector = np.array()
+
 
 def init_forest(dim):	
 	"""Create a forest as a grid of dim x dim size. 
