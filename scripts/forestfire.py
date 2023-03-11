@@ -1,6 +1,10 @@
 import numpy as np
 from datetime import datetime
 
+# temporary solution to max depth err
+import sys
+sys.setrecursionlimit(2000)
+
 
 # basic square forest
 # each cell has 3 possible states: 0, 1, 2 corresponding to empty, tree, fire
@@ -8,10 +12,9 @@ class square_forest:
 	# ideally evolves till full destruction, but we can set a hard limit on time
 
 	def __init__(self, dim):
-		self.dim = dim #int(input("\nEnter dimension of your square forest: ")) # dimension of square forest
+		self.dim = dim  # dimension of square forest
 		self.cells = np.zeros((self.dim, self.dim)) # forest grid init
-		# print(f"\npre-init of forest grid \n{self.cells}\n")
-		self.burnt = [] # not really a property, just easier to not pass this hehe; keeps track of how many trees were burnt in this forest instance, reset after every fire
+		self.burnt = [] # not really a property, just easier to not pass this hehe; keeps track of how many trees were burnt and where in this forest instance
 		self.grid_collector = [] # for the purpose of plotting
 
 	def init_cells(self):
@@ -85,39 +88,33 @@ class square_forest:
 			# decimate: first set to 2
 			self.cells[row, col] = 2
 			self.burnt.append((row, col))
-		# print("\n incendio \n", self.cells)
-		# print(f"\nIntermediate spreading: \n{self.cells}")
+		
 		self.grid_collector.append(self.cells)
+
 		# spread to second degree neighbours
 		for cell in valid_neighbours:
 			next_neighbours = self.get_valid_neighbours(cell)
 			if len(next_neighbours) != 0: # i.e has somewhere to spread to
 				self.spread_to(next_neighbours)
 
-		# print("\n----------DONE RECURSING---------")
-
 	
 	def simulate_fire_at(self, fire_loc):
 		# takes a location as a param, simulates the spread of fire at that location; keeps tabs on how much area has been affected
 
 		self.cells[fire_loc[0], fire_loc[1]] = 2
-		# print(f"\n fire started at {fire_loc}:\n{self.cells}")
 		self.burnt.append(fire_loc)
 
 		# spread
 		neighbours = self.get_valid_neighbours(fire_loc)
-		self.spread_to(neighbours)
-		#--------------------------------------------
-		# spread_to() will set the states to 2
-		# print(f"\nFinal decimation: \n{self.cells}\n")
-		# self.grid_collector.append(self.cells)
+		self.spread_to(neighbours)	# spread_to() will set the states to 2
+		self.grid_collector.append(self.cells)
+
 		# now we change it to 0 so that the simulation can proceed as required
 		for (r, c) in self.burnt:
 			self.cells[r, c] = 0
 
 		area_burnt = len(self.burnt)
-		self.burnt = [] # reset for next fire
-		# print(f"\nAfter reset: \n{self.cells}\n")
+		self.burnt = [] # reset for next fire # if the locs themselves are not used, replace with a simple counter
 		self.grid_collector.append(self.cells)
 
 
@@ -128,10 +125,9 @@ class square_forest:
 		for i in range(self.dim * self.dim):
 			coords = np.random.randint(self.dim, size=2)
 			if self.cells[coords[0], coords[1]] != 1 : 
-				# there is no tree here
-				# so plant a tree
+				
+				# plant a tree since there is no tree here
 				self.cells[coords[0], coords[1]] = 1 # planted
-				# print(f"\nTree planted at {coords}! after {i+1} iterations\n{self.cells}")
 				self.grid_collector.append(self.cells)
 				break
 
@@ -140,32 +136,24 @@ class square_forest:
 
 def run_simulation(gridsize,fire_fq):
 	# runs simulation and does housekeeping
-
-	
-
-	#---------------------------------------------------------------------------
-
 	forest = square_forest(dim = gridsize) #initialize a square forest
 
 	forest.init_cells()
 
+	# not added the coin flipping between the two functions of burn vs plant tree yet
 	start_loc = forest.get_fire_loc()
 	area_burnt, grids = forest.simulate_fire_at(start_loc)
-	# print(f"area burnt : {area_burnt}")
-
+	
 	forest.plant_one_tree()
 
-	# # at the end, reset grid collector
-	# forest.grid_collector = [] # is this actually needed? every instance will reset it automatically
 	logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
-	logfile.write(f"time: {datetime.now()}\tarea burnt: {area_burnt}\tgrids: {grids}\n")
+	logfile.write(f"time: {datetime.now()}\tarea burnt: {area_burnt}\n")
 	logfile.close()
 	# close opened files
 	
 
 
 def main():
-
 	# CSV in input files; txt files accepted. each line corresponds to one simulation param set
 	# gridsize,firefq,numsims
 	input_params = open("params.txt", "r+")
@@ -173,15 +161,14 @@ def main():
 	for line in input_params.readlines():
 		line = line.split(",")
 		grid_size, fire_fq, num_sims = int(line[0]), float(line[1]), int(line[2])
-		print(f"grid size: {grid_size}, fire freq: {fire_fq}, num sims: {num_sims}\n")
+		print(f"grid size: {grid_size}, fire freq: {fire_fq}, num sims: {num_sims}\nRunning.....")
 
 		# running simulation for these params
 		for i in range(num_sims):
 			run_simulation(grid_size, fire_fq)
-	# opens a file to keep track of output of each simulation at a given frequency (and grid size)
-	# logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
+		
 
-
-	# run_simulation()
+		print("Done!\n")
+#----------------------------------------------------------------------------------------------------
 
 main()
