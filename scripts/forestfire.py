@@ -66,7 +66,7 @@ class square_forest:
 				if n != None:
 					valid_neighbours.append(n)
 
-			if len(valid_neighbours) != 0: print("\n List of valid neighbours: ", valid_neighbours) 
+			# if len(valid_neighbours) != 0: print("\n List of valid neighbours: ", valid_neighbours) 
 
 			return valid_neighbours
 
@@ -86,7 +86,7 @@ class square_forest:
 			self.cells[row, col] = 2
 			self.burnt.append((row, col))
 		# print("\n incendio \n", self.cells)
-		print(f"\nIntermediate spreading: \n{self.cells}")
+		# print(f"\nIntermediate spreading: \n{self.cells}")
 		self.grid_collector.append(self.cells)
 		# spread to second degree neighbours
 		for cell in valid_neighbours:
@@ -101,7 +101,7 @@ class square_forest:
 		# takes a location as a param, simulates the spread of fire at that location; keeps tabs on how much area has been affected
 
 		self.cells[fire_loc[0], fire_loc[1]] = 2
-		print(f"\n fire started at {fire_loc}:\n{self.cells}")
+		# print(f"\n fire started at {fire_loc}:\n{self.cells}")
 		self.burnt.append(fire_loc)
 
 		# spread
@@ -109,17 +109,19 @@ class square_forest:
 		self.spread_to(neighbours)
 		#--------------------------------------------
 		# spread_to() will set the states to 2
-		print(f"\nFinal decimation: \n{self.cells}\n")
-		self.grid_collector.append(self.cells)
+		# print(f"\nFinal decimation: \n{self.cells}\n")
+		# self.grid_collector.append(self.cells)
 		# now we change it to 0 so that the simulation can proceed as required
 		for (r, c) in self.burnt:
 			self.cells[r, c] = 0
 
 		area_burnt = len(self.burnt)
-		self.burnt = [] # reset for next simulation
-		print(f"\nAfter reset: \n{self.cells}\n")
+		self.burnt = [] # reset for next fire
+		# print(f"\nAfter reset: \n{self.cells}\n")
 		self.grid_collector.append(self.cells)
-		return area_burnt
+
+
+		return area_burnt, self.grid_collector
 
 	def plant_one_tree(self):
 		# plants a NEW tree with probability 1 at a random location on the grid
@@ -129,37 +131,57 @@ class square_forest:
 				# there is no tree here
 				# so plant a tree
 				self.cells[coords[0], coords[1]] = 1 # planted
-				print(f"\nTree planted at {coords}! after {i+1} iterations\n{self.cells}")
+				# print(f"\nTree planted at {coords}! after {i+1} iterations\n{self.cells}")
 				self.grid_collector.append(self.cells)
 				break
 
 
 #-------------------------------------------------------------------------------
 
-def run_simulation(fire_fq = 0):
+def run_simulation(gridsize,fire_fq):
 	# runs simulation and does housekeeping
 
-	# open input parameter file
-	input_params = open("params.txt", "r+")
-	# opens a file to keep track of output of each simulation at a given frequency (and grid size)
-	logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
+	
 
 	#---------------------------------------------------------------------------
 
-	forest = square_forest(dim = 128) #initialize a square forest
+	forest = square_forest(dim = gridsize) #initialize a square forest
 
 	forest.init_cells()
 
 	start_loc = forest.get_fire_loc()
-	area_burnt = forest.simulate_fire_at(start_loc)
-	print(f"area burnt : {area_burnt}")
+	area_burnt, grids = forest.simulate_fire_at(start_loc)
+	# print(f"area burnt : {area_burnt}")
 
 	forest.plant_one_tree()
 
 	# # at the end, reset grid collector
 	# forest.grid_collector = [] # is this actually needed? every instance will reset it automatically
-
-	# close opened files
-	input_params.close()
+	logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
+	logfile.write(f"time: {datetime.now()}\tarea burnt: {area_burnt}\tgrids: {grids}\n")
 	logfile.close()
-run_simulation()
+	# close opened files
+	
+
+
+def main():
+
+	# CSV in input files; txt files accepted. each line corresponds to one simulation param set
+	# gridsize,firefq,numsims
+	input_params = open("params.txt", "r+")
+	
+	for line in input_params.readlines():
+		line = line.split(",")
+		grid_size, fire_fq, num_sims = int(line[0]), float(line[1]), int(line[2])
+		print(f"grid size: {grid_size}, fire freq: {fire_fq}, num sims: {num_sims}\n")
+
+		# running simulation for these params
+		for i in range(num_sims):
+			run_simulation(grid_size, fire_fq)
+	# opens a file to keep track of output of each simulation at a given frequency (and grid size)
+	# logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
+
+
+	# run_simulation()
+
+main()
