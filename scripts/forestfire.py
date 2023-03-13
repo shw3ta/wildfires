@@ -3,7 +3,7 @@ from datetime import datetime
 
 # temporary solution to max depth err
 import sys
-sys.setrecursionlimit(2000)
+sys.setrecursionlimit(5000)
 
 
 # basic square forest
@@ -118,7 +118,7 @@ class square_forest:
 		self.grid_collector.append(self.cells)
 
 
-		return area_burnt, self.grid_collector
+		return area_burnt
 
 	def plant_one_tree(self):
 		# plants a NEW tree with probability 1 at a random location on the grid
@@ -134,20 +134,40 @@ class square_forest:
 
 #-------------------------------------------------------------------------------
 
-def run_simulation(gridsize,fire_fq):
+def run_simulation(gridsize,fire_fq_denom):
 	# runs simulation and does housekeeping
-	forest = square_forest(dim = gridsize) #initialize a square forest
 
+	N_s = 1000000 # num time steps per simulation as in Malamud et. al (1998)
+	area_burnt, grids = {}, []
+
+	forest = square_forest(dim = gridsize) #initialize a square forest; paper uses 128 x 128 only
 	forest.init_cells()
 
-	# not added the coin flipping between the two functions of burn vs plant tree yet
-	start_loc = forest.get_fire_loc()
-	area_burnt, grids = forest.simulate_fire_at(start_loc)
-	
-	forest.plant_one_tree()
+	fire_num = 0
+	print("Running..\n")
+	for i in range(N_s):
+		# print(f"Time step {i+1}/{N_s}\n")
+		if i % fire_fq_denom != 0:
+			# print("planting tree\n")
+			forest.plant_one_tree()
 
-	logfile = open(f"logfile_{str(fire_fq)}.txt", "a+")
-	logfile.write(f"time: {datetime.now()}\tarea burnt: {area_burnt}\n")
+		else:
+			# set fire
+			start_loc = forest.get_fire_loc()
+			try:
+				A_f = forest.simulate_fire_at(start_loc)
+				fire_num += 1
+				area_burnt.update({f"{fire_num}": A_f}) # dictionary that stores all fires that happen in the sim with the corresponding area burnt
+			except RecursionError as err:
+				print("Recursion limit exceeded, ignoring this fire in simulation\n")
+				area_burnt.update({f"{fire_num}": None})
+				continue
+
+	grids = forest.grid_collector
+	# run gif here or return this and run a separate function
+
+	logfile = open(f"logfile_{str(1/fire_fq_denom)}.txt", "a+")
+	logfile.write(f"time: {datetime.now()}\tgrid size: {gridsize}\ttotal number of recorded fires: {len(area_burnt)}\tarea burnt per fire: {area_burnt}\n")
 	logfile.close()
 	# close opened files
 	
@@ -155,17 +175,18 @@ def run_simulation(gridsize,fire_fq):
 
 def main():
 	# CSV in input files; txt files accepted. each line corresponds to one simulation param set
-	# gridsize,firefq,numsims
+	# gridsize,fire_fq_denom,num_sims
 	input_params = open("params.txt", "r+")
 	
 	for line in input_params.readlines():
 		line = line.split(",")
-		grid_size, fire_fq, num_sims = int(line[0]), float(line[1]), int(line[2])
-		print(f"grid size: {grid_size}, fire freq: {fire_fq}, num sims: {num_sims}\nRunning.....")
+		grid_size, fire_fq_denom, num_sims = int(line[0]), float(line[1]), int(line[2])
+		print(f"grid size: {grid_size}, fire freq: {1/fire_fq_denom}, num sims: {num_sims}\n")
 
 		# running simulation for these params
+		# note that num_sims is a hyperparam, not the same as N_s in the paper.
 		for i in range(num_sims):
-			run_simulation(grid_size, fire_fq)
+			run_simulation(grid_size, fire_fq_denom)
 		
 
 		print("Done!\n")
