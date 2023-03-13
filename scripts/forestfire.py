@@ -135,6 +135,17 @@ class square_forest:
 
 
 #-------------------------------------------------------------------------------
+def housekeep(gridsize, area_burnt, fire_fq_denom):
+
+	fname = os.path.relpath('/logfiles', '/scripts')+f"/logfile_{str(1/fire_fq_denom)}.json"
+	logfile = open(fname, "a+")
+
+	to_write = {"time": str(datetime.now()), "gridsize": gridsize, "N_fires_recorded": len(area_burnt), "A_f_per_fire": area_burnt}
+	jsonified = json.dumps(to_write, indent=4)
+
+	logfile.write(jsonified)
+	logfile.close()
+	# close opened files
 
 def run_simulation(gridsize,fire_fq_denom):
 	# runs simulation and does housekeeping
@@ -168,16 +179,7 @@ def run_simulation(gridsize,fire_fq_denom):
 	grids = forest.grid_collector
 	# run gif here or return this and run a separate function
 
-
-	fname = os.path.relpath('/logfiles', '/scripts')+f"/logfile_{str(1/fire_fq_denom)}.json"
-	logfile = open(fname, "a+")
-
-	to_write = {"time": str(datetime.now()), "gridsize": gridsize, "N_fires_recorded": len(area_burnt), "A_f_per_fire": area_burnt}
-	jsonified = json.dumps(to_write, indent=4)
-	
-	logfile.write(jsonified)
-	logfile.close()
-	# close opened files
+	housekeep(gridsize, area_burnt, fire_fq_denom)
 	
 
 
