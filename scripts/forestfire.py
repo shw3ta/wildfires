@@ -1,8 +1,10 @@
 import numpy as np
 from datetime import datetime
+import os
+import sys
+import json
 
 # temporary solution to max depth err
-import sys
 sys.setrecursionlimit(5000)
 
 
@@ -166,8 +168,14 @@ def run_simulation(gridsize,fire_fq_denom):
 	grids = forest.grid_collector
 	# run gif here or return this and run a separate function
 
-	logfile = open(f"logfile_{str(1/fire_fq_denom)}.txt", "a+")
-	logfile.write(f"time: {datetime.now()}\tgrid size: {gridsize}\ttotal number of recorded fires: {len(area_burnt)}\tarea burnt per fire: {area_burnt}\n")
+
+	fname = os.path.relpath('/logfiles', '/scripts')+f"/logfile_{str(1/fire_fq_denom)}.json"
+	logfile = open(fname, "a+")
+
+	to_write = {"time": str(datetime.now()), "gridsize": gridsize, "N_fires_recorded": len(area_burnt), "A_f_per_fire": area_burnt}
+	jsonified = json.dumps(to_write, indent=4)
+	
+	logfile.write(jsonified)
 	logfile.close()
 	# close opened files
 	
