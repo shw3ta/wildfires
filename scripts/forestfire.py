@@ -17,9 +17,9 @@ class square_forest:
 		self.dim = dim  # dimension of square forest
 		self.cells = np.zeros((self.dim, self.dim)) # forest grid init
 		self.burnt = [] # not really a property, just easier to not pass this hehe; keeps track of how many trees were burnt and where in this forest instance
-		self.grid_collector = [] # for the purpose of plotting
+		# self.grid_collector = [] # for the purpose of plotting
 
-	def init_cells(self):
+	def init_cells(self, GRIDS):
 		# random init with some number of trees; upper limit = dim * dim
 		n_max = np.random.randint(self.dim * self.dim) 
 
@@ -34,7 +34,11 @@ class square_forest:
 			self.cells[tree[0], tree[1]] = 1
 
 		# print(f"\nafter random tree planting: \n{self.cells}")
-		self.grid_collector.append(self.cells)
+		copy_state = self.cells
+		GRIDS.append(copy_state)
+		# self.grid_collector.append(copy_state)
+		print(f"len of GRIDS: {len(GRIDS)}")
+		print(f"Init\n {self.cells}\n {copy_state}\n{GRIDS[-1]}")
 	
 	def get_valid_neighbours(self, cell):
 		# checking for edge indices 
@@ -81,7 +85,7 @@ class square_forest:
 		return np.random.randint(self.dim, size=2)
 
 	
-	def spread_to(self, valid_neighbours):
+	def spread_to(self, valid_neighbours, GRIDS):
 		# function to spread the fire to first degree neighbours; recursive
 		# print("\n---------------------------\nThe next degree neighbours are at: ", valid_neighbours)
 	
@@ -90,26 +94,38 @@ class square_forest:
 			# decimate: first set to 2
 			self.cells[row, col] = 2
 			self.burnt.append((row, col))
-		
-		self.grid_collector.append(self.cells)
+		copy_state = self.cells
+		# self.grid_collector.append(copy_state)
+		GRIDS.append(copy_state)
+		print(f"len of GRIDS: {len(GRIDS)}")
+		print(f"spread inside func\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
 
 		# spread to second degree neighbours
 		for cell in valid_neighbours:
 			next_neighbours = self.get_valid_neighbours(cell)
 			if len(next_neighbours) != 0: # i.e has somewhere to spread to
-				self.spread_to(next_neighbours)
+				self.spread_to(next_neighbours, GRIDS)
 
 	
-	def start_fire_at(self, fire_loc):
+	def start_fire_at(self, fire_loc, GRIDS):
 		# takes a location as a param, simulates the spread of fire at that location; keeps tabs on how much area has been affected
 
 		self.cells[fire_loc[0], fire_loc[1]] = 2
+		print("spread initiated\n", self.cells)
 		self.burnt.append(fire_loc)
+		copy_state = self.cells
+		GRIDS.append(copy_state)
+		print(f"len of GRIDS: {len(GRIDS)}")
+		print(f"starting\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
 
 		# spread
 		neighbours = self.get_valid_neighbours(fire_loc)
-		self.spread_to(neighbours)	# spread_to() will set the states to 2
-		self.grid_collector.append(self.cells)
+		self.spread_to(neighbours, GRIDS)	# spread_to() will set the states to 2
+		copy_state = self.cells
+		# self.grid_collector.append(copy_state)
+		GRIDS.append(copy_state)
+		print(f"len of GRIDS: {len(GRIDS)}")
+		print(f"last state after spread\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
 
 		# now we change it to 0 so that the simulation can proceed as required
 		for (r, c) in self.burnt:
@@ -117,12 +133,16 @@ class square_forest:
 
 		area_burnt = len(self.burnt)
 		self.burnt = [] # reset for next fire # if the locs themselves are not used, replace with a simple counter
-		self.grid_collector.append(self.cells)
+		copy_state = self.cells
+		# self.grid_collector.append(copy_state)
+		GRIDS.append(copy_state)
+		print(f"len of GRIDS: {len(GRIDS)}")
+		print(f"reset after spread\n {self.cells}\n {copy_state}\n{GRIDS[-1]}")
 
 
 		return area_burnt
 
-	def plant_one_tree(self):
+	def plant_one_tree(self, GRIDS):
 		# plants a NEW tree with probability 1 at a random location on the grid
 		for i in range(self.dim * self.dim):
 			coords = np.random.randint(self.dim, size=2)
@@ -130,7 +150,11 @@ class square_forest:
 				
 				# plant a tree since there is no tree here
 				self.cells[coords[0], coords[1]] = 1 # planted
-				self.grid_collector.append(self.cells)
+				copy_state = self.cells
+				# self.grid_collector.append(copy_state)
+				GRIDS.append(copy_state)
+				print(f"len of GRIDS: {len(GRIDS)}")
+				print(f"tree planted\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
 				break
 
 
@@ -147,14 +171,14 @@ def housekeep(gridsize, area_burnt, fire_fq_denom):
 	logfile.close()
 	# close opened files
 
-def run_simulation(gridsize,fire_fq_denom):
+def run_simulation(gridsize,fire_fq_denom, GRIDS):
 	# runs simulation and does housekeeping
 
-	N_s = 16380000 # num time steps per simulation as in Malamud et. al (1998)
-	area_burnt, grids = {}, []
+	N_s = 20 # num time steps per simulation as in Malamud et. al (1998)
+	area_burnt = {}
 
 	forest = square_forest(dim = gridsize) #initialize a square forest; paper uses 128 x 128 only
-	forest.init_cells()
+	forest.init_cells(GRIDS)
 
 	fire_num = 0
 	print("Running..\n")
@@ -162,13 +186,13 @@ def run_simulation(gridsize,fire_fq_denom):
 		# print(f"Time step {i+1}/{N_s}\n")
 		if i % fire_fq_denom != 0:
 			# print("planting tree\n")
-			forest.plant_one_tree()
+			forest.plant_one_tree(GRIDS)
 
 		else:
 			# set fire
 			start_loc = forest.get_fire_loc()
 			try:
-				A_f = forest.start_fire_at(start_loc)
+				A_f = forest.start_fire_at(start_loc, GRIDS)
 				fire_num += 1
 				area_burnt.update({fire_num: A_f}) # dictionary that stores all fires that happen in the sim with the corresponding area burnt
 			except RecursionError as err:
@@ -176,8 +200,7 @@ def run_simulation(gridsize,fire_fq_denom):
 				area_burnt.update({fire_num: None})
 				continue
 
-	grids = forest.grid_collector
-	# run gif here or return this and run a separate function
+		
 
 	housekeep(gridsize, area_burnt, fire_fq_denom)
 	
@@ -186,6 +209,7 @@ def run_simulation(gridsize,fire_fq_denom):
 def main():
 	# CSV in input files; txt files accepted. each line corresponds to one simulation param set
 	# gridsize,fire_fq_denom,num_sims
+	GRIDS = []
 	input_params = open("params.txt", "r+")
 	
 	for line in input_params.readlines():
@@ -196,10 +220,18 @@ def main():
 		# running simulation for these params
 		# note that num_sims is a hyperparam, not the same as N_s in the paper.
 		for i in range(num_sims):
-			run_simulation(grid_size, fire_fq_denom)
+			run_simulation(grid_size, fire_fq_denom, GRIDS)
+			print(f"len of GRIDS after the whole thing: {len(GRIDS)}")
+			with open("wtf.txt", "w") as fuckit:
+				for i in range(len(GRIDS)):
+					fuckit.write(str(GRIDS[i])+"\n\n")
+
+			fuckit.close()
 		
 
 		print("Done!\n")
+		
+
 #----------------------------------------------------------------------------------------------------
 
 main()
