@@ -100,7 +100,7 @@ class square_forest:
 				self.spread_to(next_neighbours)
 
 	
-	def simulate_fire_at(self, fire_loc):
+	def start_fire_at(self, fire_loc):
 		# takes a location as a param, simulates the spread of fire at that location; keeps tabs on how much area has been affected
 
 		self.cells[fire_loc[0], fire_loc[1]] = 2
@@ -150,7 +150,7 @@ def housekeep(gridsize, area_burnt, fire_fq_denom):
 def run_simulation(gridsize,fire_fq_denom):
 	# runs simulation and does housekeeping
 
-	N_s = 1000000 # num time steps per simulation as in Malamud et. al (1998)
+	N_s = 16380000 # num time steps per simulation as in Malamud et. al (1998)
 	area_burnt, grids = {}, []
 
 	forest = square_forest(dim = gridsize) #initialize a square forest; paper uses 128 x 128 only
@@ -168,12 +168,12 @@ def run_simulation(gridsize,fire_fq_denom):
 			# set fire
 			start_loc = forest.get_fire_loc()
 			try:
-				A_f = forest.simulate_fire_at(start_loc)
+				A_f = forest.start_fire_at(start_loc)
 				fire_num += 1
-				area_burnt.update({f"{fire_num}": A_f}) # dictionary that stores all fires that happen in the sim with the corresponding area burnt
+				area_burnt.update({fire_num: A_f}) # dictionary that stores all fires that happen in the sim with the corresponding area burnt
 			except RecursionError as err:
 				print("Recursion limit exceeded, ignoring this fire in simulation\n")
-				area_burnt.update({f"{fire_num}": None})
+				area_burnt.update({fire_num: None})
 				continue
 
 	grids = forest.grid_collector
