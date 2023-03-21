@@ -1,4 +1,4 @@
-# Forest fires model 3 ​
+# Forest fires model 
 
 This repository contains cellular automata simulation of forest fires based on [Malamud et. al, 1998](https://github.com/shw3ta/wildfires/blob/main/references/MalamudTurcotteMorein_ForestFires_Science_1998.pdf) made for the purpose of [Introduction to Python](https://github.com/eulerlab/pyclass23) course at University of Tübingen in an academic year 2022/23 by Shweta Prasad and Weronika Sójka. 
 
