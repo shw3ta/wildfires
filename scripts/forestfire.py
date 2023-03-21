@@ -38,7 +38,7 @@ class square_forest:
 		GRIDS.append(copy_state)
 		# self.grid_collector.append(copy_state)
 		print(f"len of GRIDS: {len(GRIDS)}")
-		print(f"Init\n {self.cells}\n {copy_state}\n{GRIDS[-1]}")
+		print(f"Init\n {self.cells}\n {copy_state}\n{GRIDS[0]}")
 	
 	def get_valid_neighbours(self, cell):
 		# checking for edge indices 
@@ -98,7 +98,7 @@ class square_forest:
 		# self.grid_collector.append(copy_state)
 		GRIDS.append(copy_state)
 		print(f"len of GRIDS: {len(GRIDS)}")
-		print(f"spread inside func\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
+		print(f"spread inside func\n {self.cells}\n{copy_state}\n{GRIDS[0]}")
 
 		# spread to second degree neighbours
 		for cell in valid_neighbours:
@@ -116,7 +116,7 @@ class square_forest:
 		copy_state = self.cells
 		GRIDS.append(copy_state)
 		print(f"len of GRIDS: {len(GRIDS)}")
-		print(f"starting\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
+		print(f"starting\n {self.cells}\n{copy_state}\n{GRIDS[0]}")
 
 		# spread
 		neighbours = self.get_valid_neighbours(fire_loc)
@@ -125,7 +125,7 @@ class square_forest:
 		# self.grid_collector.append(copy_state)
 		GRIDS.append(copy_state)
 		print(f"len of GRIDS: {len(GRIDS)}")
-		print(f"last state after spread\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
+		print(f"last state after spread\n {self.cells}\n{copy_state}\n{GRIDS[0]}")
 
 		# now we change it to 0 so that the simulation can proceed as required
 		for (r, c) in self.burnt:
@@ -137,7 +137,7 @@ class square_forest:
 		# self.grid_collector.append(copy_state)
 		GRIDS.append(copy_state)
 		print(f"len of GRIDS: {len(GRIDS)}")
-		print(f"reset after spread\n {self.cells}\n {copy_state}\n{GRIDS[-1]}")
+		print(f"reset after spread\n {self.cells}\n {copy_state}\n{GRIDS[0]}")
 
 
 		return area_burnt
@@ -154,7 +154,7 @@ class square_forest:
 				# self.grid_collector.append(copy_state)
 				GRIDS.append(copy_state)
 				print(f"len of GRIDS: {len(GRIDS)}")
-				print(f"tree planted\n {self.cells}\n{copy_state}\n{GRIDS[-1]}")
+				print(f"tree planted\n {self.cells}\n{copy_state}\n{GRIDS[0]}")
 				break
 
 
