@@ -4,6 +4,11 @@ import sys
 import json 
 from datetime import datetime
 
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.colors import ListedColormap
+
 sys.setrecursionlimit(5000)
 
 class Forest:
@@ -54,7 +59,7 @@ class Forest:
 		
 		# @wero: i removed the second loop; now we directly change state.
 		for i in range(n_max):
-			coordinate = tuple(np.random.randint(self.dimension, size = 2)) #get random within-grid coordinate
+			coordinate = tuple(np.random.randint(self.dimension, size = 2)) # get random within-grid coordinate
 			if self.cells[coordinate[0], coordinate[1]] == 0:
 				self.cells[coordinate[0], coordinate[1]] = 1
 
@@ -140,20 +145,26 @@ def dump_logs(dimension, area_burnt, fire_fq_denom):
 	logfile.close()
 
 
-def animate(grids_collected):
+def animate(grids_collected, grid_size, fire_fq_denom):
+	color_lst = ['wheat','yellowgreen','darkorange']
+	cmap = ListedColormap(color_lst)
+
 	print("\nRunning animation...")
 	grids = grids_collected
-	# to test, uncomment the next two lines
-	# for grid in grids:
-	# 	print(f"\n {grid}")
-	
-	# do what you need to do here, @wero
+	fig, ax = plt.subplots(figsize=(8, 8))
+	frames = []
+	for grid in grids:
+		frames.append([plt.imshow(grid, cmap=cmap, vmin=0, vmax=2)])
+
+	movie = animation.ArtistAnimation(fig, frames, interval=1000, repeat=False, blit=True)
+	movie.save(f'animation_{grid_size}_{1/fire_fq_denom}.mp4', fps=100)
+
 
 def run_simulation(grid_size, fire_fq_denom):
 	print("\nRunning simulation...")
 	
 	# set number of simulations here
-	N_s = 100 # test
+	N_s = 10000 # test
 	area_burnt = {}
 
 	forest = Forest(grid_size)
@@ -198,17 +209,7 @@ def main():
 		forest = run_simulation(grid_size, fire_fq_denom)	
 
 		if mode == "1":
-			animate(forest.grids)
+			animate(forest.grids, grid_size, fire_fq_denom)
 
 		# run_analysis(forest)
 main()
-
-
-
-
-
-
-
-
-
-
