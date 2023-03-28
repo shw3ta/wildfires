@@ -3,19 +3,20 @@ import os
 import sys
 import json 
 from datetime import datetime
+import gc
 
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
 
-sys.setrecursionlimit(5000)
+sys.setrecursionlimit(4000)
 
 class Forest:
 	
 	# defining attributes of the forest
-	def __init__(self, dimension):
-		self.dimension = dimension
+	def __init__(self, dimension, mode):
+		self.dimension, self.mode = dimension, mode
 		self.cells = np.zeros((self.dimension, self.dimension)) # initialize square grid with 0s
 		self.grids, self.burnt = [], []
 
@@ -23,6 +24,9 @@ class Forest:
 	def collect(self):
 		state = self.cells.copy()
 		self.grids.append(state)
+
+		del state 
+		gc.collect()
 
 	def get_valid_neighbours(self, cell):
 
@@ -63,7 +67,8 @@ class Forest:
 			if self.cells[coordinate[0], coordinate[1]] == 0:
 				self.cells[coordinate[0], coordinate[1]] = 1
 
-		self.collect()
+		if self.mode == "1": 
+			self.collect()
 
 	def plant_tree(self):
 		while True:
@@ -71,7 +76,8 @@ class Forest:
 			if self.cells[coordinate[0], coordinate[1]] != 1:
 				self.cells[coordinate[0], coordinate[1]] = 1
 
-				self.collect()
+				if self.mode == "1":
+					self.collect()
 				break
 	
 
@@ -79,8 +85,8 @@ class Forest:
 		for (row, col) in valid_neighbours:
 			self.cells[row, col] = 2
 			self.burnt.append((row, col))
-
-		self.collect()
+			if self.mode == "1":
+				self.collect()
 
 		# now spread to 2nd degree neighbours
 		for cell in valid_neighbours:
@@ -95,7 +101,8 @@ class Forest:
 		for (r, c) in self.burnt:
 			self.cells[r, c] = 0
 
-		self.collect()
+		if self.mode == "1":
+			self.collect()
 
 
 	def start_fire(self, fire_loc):
@@ -104,7 +111,8 @@ class Forest:
 		# drop match at location
 		self.cells[row, col] = 2
 		self.burnt.append(fire_loc)
-		self.collect()
+		if self.mode == "1":
+			self.collect()
 
 		neighbours = self.get_valid_neighbours(fire_loc)
 		self.spread_to(neighbours)
@@ -120,8 +128,6 @@ class Forest:
 #---------------------------------
 def set_params():
 	# reads params from file
-	print("\nReading params.txt in working directory for parameters...\n")
-
 	input_params = []
 	f = open("params.txt", "r")
 	for line in f.readlines():
@@ -157,17 +163,16 @@ def animate(grids_collected, grid_size, fire_fq_denom):
 		frames.append([plt.imshow(grid, cmap=cmap, vmin=0, vmax=2)])
 
 	movie = animation.ArtistAnimation(fig, frames, interval=1000, repeat=False, blit=True)
-	movie.save(f'animation_{grid_size}_{1/fire_fq_denom}.mp4', fps=100)
+	movie.save(f'../animations/animation_{grid_size}_{1/fire_fq_denom}_{str(datetime.now())}.mp4', fps=100)
+	print(f"\nAnimation done! Find the corresponding movie file \"animation_{grid_size}_{1/fire_fq_denom}_{str(datetime.now())}.mp4\" in the folder \"animations\"")
 
 
-def run_simulation(grid_size, fire_fq_denom):
-	print("\nRunning simulation...")
+def run_simulation(grid_size, fire_fq_denom, N_s, mode):
+	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
 	
-	# set number of simulations here
-	N_s = 10000 # test
-	area_burnt = {}
+	area_burnt, buffer = {}, {}
 
-	forest = Forest(grid_size)
+	forest = Forest(grid_size, mode)
 	forest.random_init_trees()
 
 	fire_num = 0
@@ -175,41 +180,59 @@ def run_simulation(grid_size, fire_fq_denom):
 		if i % fire_fq_denom != 0:
 			forest.plant_tree()
 		else:
+			if fire_num % 5 == 0 and fire_num != 0:
+				# dump in chunks:
+				dump_logs(forest.dimension, buffer, fire_fq_denom)
+				buffer = {}
+
 			start_loc = np.random.randint(forest.dimension, size = 2)
 			try:
 				A_f = forest.start_fire(start_loc)
 				fire_num += 1
 				area_burnt.update({fire_num : A_f})
+				buffer.update({fire_num : A_f})
 
 			except RecursionError as err:
-				print("Recursion limit exceeded, ignoring this fire in simulation\n")
+				print(f"Recursion limit exceeded at fire number {fire_num} in this simulation.")
 				area_burnt.update({fire_num : None})
+				buffer.update({fire_num : None})
 				continue
-
+	
 	dump_logs(forest.dimension, area_burnt, fire_fq_denom)
+	
 	return forest
 
 
 
-def run_analysis():
+def run_analysis(grid_size, fire_fq_denom):
 	print("\nRunning analysis...")
 	pass
 #---------------------------------
 
 def main():
-	mode = input("This is a programme to simulate forest fires. What mode would you like to run the simulation in?\n \n(slow mode) For an animation of the fire, enter 1, \n(fast mode) For just the analysis, enter 2.\n")
-	print(f"\nYou entered mode {mode}.\n\n")
-
+	mode = input("This is a program to simulate forest fires. What mode would you like to run the simulation in?\n \n(slow mode) For an animation of the fire, enter 1, \n(fast mode) For just the analysis, enter 2.\n")
+	
 	input_params = set_params() # tuple of grid_size, fire_fq_denom
 
 	for (grid_size, fire_fq_denom) in input_params:
 
-		# run simulation
-		print(f"\nInitiating simulation with grid_size {grid_size} and fire frequency {1/fire_fq_denom}...")
-		forest = run_simulation(grid_size, fire_fq_denom)	
-
+		# run simulation in slow mode
 		if mode == "1":
+			num_gens = 10000
+			print(f"\nInitiating simulation with grid_size {grid_size} and fire frequency {1/fire_fq_denom}...")
+			forest = run_simulation(grid_size, fire_fq_denom, num_gens, mode)
+		
 			animate(forest.grids, grid_size, fire_fq_denom)
 
-		# run_analysis(forest)
+		elif mode == "2":
+			num_gens = 100000000
+			forest = run_simulation(grid_size, fire_fq_denom, num_gens, mode)
+			print("done.")
+
+			# run_analysis(grid_size, fire_fq_denom)
+
+		else:
+			print("Invalid mode. Bye.")
+			exit()
+
 main()
