@@ -50,5 +50,6 @@ For very low fire frequencies on big grids, we may encounter maximum recursion d
 
 2. ***slow mode***:
 In this mode, we collect and use the grid state of the forest to display an animation. By default, the program shows you a grid of dimensions $128 \times 128$, running for $10000$ generations with a fire frequency of $1/500$. Any animation produced with this set of parameters will have 20 fires.\ 
+
 To note: the animation is saved to ```animations/``` as a ```.mp4	``` file and is shown after frame by frame compression to ensure that memory usage does not explode with frames. We currently use a round-about method which requires that you have ```ffmpeg``` installed, but it's guaranteed to be at least three times faster than matplotlib's animation utilities. In case you do want to produce a high resolution output and have a lot of time on your hands, we provide you with a choice on that matter too.
 
