@@ -2,6 +2,7 @@
 # imports
 
 import numpy as np
+import pandas as pd
 import os, sys, csv, shlex, subprocess
 
 from datetime import datetime
@@ -319,7 +320,32 @@ def run_slow(grid_size, fire_fq_denom, N_s):
 
 def run_analysis(grid_size, fire_fq_denom, num_gens, f):
 	print("\nRunning analysis...")
-	pass
+
+	data = pd.read_csv(f, header=None)[1]
+	count, div = np.histogram(data, bins=7000) # how to adjust bins?
+	discretized = np.digitize(data, div, right=True)
+
+	A_f = np.array(data)
+	N_f = np.array([count[i-1] if i != 0 else count[i] for i in discretized])
+	N_f_per_s = N_f/num_gens
+
+	pre_df = list(zip(A_f, discretized, N_f, N_f_per_s))
+	df = pd.DataFrame(pre_df, columns=['A_f','bin ID', 'N_f', 'N_f/N_s'])
+	# print(df)
+
+	y, x = df['N_f/N_s'], df['A_f']
+
+	fig, ax = plt.subplots(figsize=(9, 6))
+	ax.scatter(x, y, s=60, alpha=0.7, edgecolors='k')
+	ax.set_xscale("log")
+	ax.set_yscale("log")
+
+	plt.show()
+	#what's left: save after adding regression line to the scatter plot and extracting slope
+
+
+
+	
 #------------------------------------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
