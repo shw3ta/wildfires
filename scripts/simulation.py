@@ -153,7 +153,6 @@ class Forest:
 		
 
 #------------------------------------------------------------------------------------------------------------------------------------
-
 # housekeeping routines
 
 # function to read parameters from a local file
@@ -162,36 +161,41 @@ def set_params():
 	
 	input_params = []
 
-	# open the file
+	# open file
 	f = open("params.txt", "r")
 
-	# read the file line by line
+	# read file line by line
 	for line in f.readlines():
 		line = line.split(",")
 		grid_size, fire_fq_denom, num_gens = int(line[0]), int(line[1]), int(line[2])
 		input_params.append((grid_size, fire_fq_denom, num_gens))
 
-	# close the file
+	# close file
 	f.close()
 
 	return input_params
 
 
-# function to write fire ID and area burnt to to csv
+# function to write fire ID and area burnt to csv
 def dump_logs(area_burnt, f):
 
+	# open file with filename passed in f
 	with open(f, "a+", newline='') as logfile:
 		writer = csv.writer(logfile)
 		for row in area_burnt.items():
+			# write row
 			writer.writerow(row)
 	
+	# close file
 	logfile.close()
 
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # animation routines
 
+# function to produce a high resolution animation of one whole simulation run
 def animate_high_res(forest, fire_fq_denom):
+	# get grids
 	grids = forest.grids
 
 	print("\nBeginning animation...")
@@ -206,20 +210,25 @@ def animate_high_res(forest, fire_fq_denom):
 	print(f"\nAnimation done! Find the corresponding movie file \"animation_{forest.dimension}_{1/fire_fq_denom}_{str(datetime.now())}.mp4\" in the folder \"animations\"")
 
 
+# function to produce a low resolution animation of one whole simulation run
 def animate_low_res(forest, fire_fq_denom):	
+	# get grids
 	grids = forest.grids	
 
 	print("\nBeginning animation...")
+
+	# makes a folder to collect the compressed frames in; using png compression
 	os.mkdir("buffer")
 	for i,grid in enumerate(grids):
 		print(f"\r{i + 1}/{len(grids)} frames compressed.", end='')
 		plt.imsave(fname=f"buffer/frame_{i}.png", arr=grid, cmap=cmap, vmin=0, vmax=2)
-		
+	
+	# the following runs commands on the shell directly	
 	command1 = shlex.split(f"/usr/bin/ffmpeg -f image2 -i buffer/frame_%d.png ../animations/animation_{forest.dimension}_{1/fire_fq_denom}.mp4")
 	command2 = shlex.split("rm -rf buffer/")
 
 	subprocess.run(command1)
-	subprocess.run(command2)
+	subprocess.run(command2) # removes the buffer directory once the animation is made
 
 	print(f"Find the movie in the folder animations/ under the file name animation_{forest.dimension}_{1/fire_fq_denom}.mp4")
 		
@@ -227,11 +236,15 @@ def animate_low_res(forest, fire_fq_denom):
 #------------------------------------------------------------------------------------------------------------------------------------
 # routines for available modes
 
+
+# function that runs the simulation without collecting the grid state at every change of state
+# dumps relevant information into logfiles and runs analysis on them to produce the relevant plots.
 def run_fast(grid_size, fire_fq_denom, N_s):
 	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
 	
 	area_burnt, buffer = {}, {}
 
+	# instantiating forest grid in fast mode and initializing
 	forest = Forest(grid_size, mode="2")
 	forest.random_init_trees()
 
@@ -240,15 +253,18 @@ def run_fast(grid_size, fire_fq_denom, N_s):
 	f_total = os.path.relpath('/logfiles', '/scripts') + f"/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
 	
 	for i in range(N_s):
+
+		# either plant a tree or start a fire depending on fire fq
 		print(f"\r{i + 1}/{N_s} generations done.", end='')
 		if i % fire_fq_denom != 0:
 			forest.plant_tree()
 		else:
 			if fire_num % 5 == 0 and fire_num != 0:
-				# dump in chunks:
+				# dump in chunks of 5 as back up to buffer file:
 				dump_logs(buffer, f_buffer)
 				buffer = {}
 
+			# pick location to start fire at
 			start_loc = np.random.randint(forest.dimension, size = 2)
 			try:
 				A_f = forest.start_fire(start_loc)
@@ -263,19 +279,21 @@ def run_fast(grid_size, fire_fq_denom, N_s):
 				continue
 
 	print("\n")
+	# final dump of all data to analyse
 	dump_logs(area_burnt, f_total)
 	
-	return forest
 
 
+# function to run the simulation and collect grids
+# then depending on user choice, the appropriate animation is done.
 def run_slow(grid_size, fire_fq_denom, N_s):
 	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
 	
-	
+	# instatiating and initalizing forest grid in animation mode
 	forest = Forest(grid_size, mode="1")
 	forest.random_init_trees()
 
-	
+	# main difference here: no file i/o to logflies for later analysis
 	for i in range(N_s):
 		print(f"\r{i + 1}/{N_s} generations done.", end='')
 		
@@ -299,12 +317,13 @@ def run_slow(grid_size, fire_fq_denom, N_s):
 
 
 
-def run_analysis(grid_size, fire_fq_denom, analysis_mode):
+def run_analysis(grid_size, fire_fq_denom, num_gens, f):
 	print("\nRunning analysis...")
 	pass
 #------------------------------------------------------------------------------------------------------------------------------------
 
-def main():
+if __name__ == "__main__":
+
 	mode = input("This is a program to simulate forest fires. What mode would you like to run the simulation in?\n \n(slow mode) For an animation of the fire, enter 1 \n(fast mode) For just the analysis, enter 2\nEnter here: ")
 	
 	if mode == "1":
@@ -312,20 +331,23 @@ def main():
 		
 
 	elif mode == "2":
-		input_params = set_params() # tuple of grid_size, fire_fq_denom
+		input_params = set_params() # tuple of grid_size, fire_fq_denom, num_gens
+
+		# run a new simulation for every set of params
 		for (grid_size, fire_fq_denom, num_gens) in input_params:
 			analysis_mode = input("\nRun new simulation instead of using previous simulation output for analysis? [y/n]: ")
-			if analysis_mode in "yY":
-				forest = run_fast(grid_size, fire_fq_denom, num_gens)
-				# forest = run_fast(50, 200, 10000) # test 
+			
+			if analysis_mode in "yY":				
+				# run_fast(50, 200, 10000) # test 
+				run_fast(grid_size, fire_fq_denom, num_gens)
+				f = f"../logfiles/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
+				run_analysis(grid_size, fire_fq_denom, num_gens, f)
+
 
 			else:
-				pass
-
+				# use old logfiles
+				f = f"../logfiles/old/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
+				run_analysis(grid_size, fire_fq_denom, num_gens, f)
 	else:
 		print("Invalid mode. Bye.")
 		exit()
-
-	
-
-main()
