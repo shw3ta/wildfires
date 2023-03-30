@@ -1,7 +1,7 @@
 
 # Studying the dynamics of forest fires 
 
-This repository contains a cellular automaton simulation of forest fires based on [Malamud et. al, 1998](https://github.com/shw3ta/wildfires/blob/main/references/MalamudTurcotteMorein_ForestFires_Science_1998.pdf) made as the final project for the course [Introduction to Python](https://github.com/eulerlab/pyclass23) at the University of Tübingen in the academic year 2022-23, submitted by Shweta Prasad and Weronika Sójka. 
+This repository contains a cellular automaton simulation of forest fires based on [Malamud et. al, 1998](https://github.com/shw3ta/wildfires/blob/main/references/MalamudTurcotteMorein_ForestFires_Science_1998.pdf) made as the final project for [Introduction to Python](https://github.com/eulerlab/pyclass23) at the University of Tübingen (2022-23), submitted by Shweta Prasad and Weronika Sójka. 
 
 You can find the original problem description on the [course repo](https://github.com/eulerlab/pyclass23/tree/main/exams). 
 
