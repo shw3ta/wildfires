@@ -47,9 +47,9 @@ scipy
 ```
 ### Examples
 #### Animation 
-This is a high resolution animation obtained on running the model for $10^5$ generations.
+This is a gif of a portion of a high resolution animation obtained on running the automaton for $10^5$ generations.
 
-![Example animation output](https://s10.gifyu.com/images/example_fire_animation.gif)
+![Example animation output](https://s10.gifyu.com/images/example_fire.gif)
 
 #### Plots produced
 
