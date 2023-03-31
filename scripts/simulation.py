@@ -11,11 +11,13 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
+from scipy.optimize import curve_fit
 #------------------------------------------------------------------------------------------------------------------------------------
 # global settings
 
 sys.setrecursionlimit(5000)
 cmap = ListedColormap(['wheat','yellowgreen','darkorange'])
+np.seterr(divide='ignore')
 #------------------------------------------------------------------------------------------------------------------------------------
 
 # defining the forest as a 2-D automaton
@@ -319,10 +321,10 @@ def run_slow(grid_size, fire_fq_denom, N_s):
 
 
 def run_analysis(grid_size, fire_fq_denom, num_gens, f):
-	print("\nRunning analysis...")
+	print(f"\nRunning analysis...")
 
 	data = pd.read_csv(f, header=None)[1]
-	count, div = np.histogram(data, bins=7000) # how to adjust bins?
+	count, div = np.histogram(data, bins=100000) 
 	discretized = np.digitize(data, div, right=True)
 
 	A_f = np.array(data)
@@ -339,11 +341,24 @@ def run_analysis(grid_size, fire_fq_denom, num_gens, f):
 	ax.scatter(x, y, s=60, alpha=0.7, edgecolors='k')
 	ax.set_xscale("log")
 	ax.set_yscale("log")
+	ax.set_xlabel("A_f")
+	ax.set_ylabel("N_f/N_s")
 
+	# line fitting with scipy
+	newX = np.logspace(0, 3, base=10)
+	def expfit(x, a, b):
+		return a * np.power(x, b)
+
+	popt, pcov = curve_fit(expfit, x, y)
+
+	plt.plot(newX, expfit(newX, *popt), label="slope : {1:.3f}.".format(*popt))
+	print("Exponential Fit: y = (a*(x**b))")
+	print("\ta = {0}\n\tb = {1}".format(*popt))
+	plt.title("Non-cumulative frequency-area distribution")
+	plt.legend()
+	plt.savefig(f"../plots/loglog_{1/fire_fq_denom}_{grid_size}.png", format='png')
 	plt.show()
-	#what's left: save after adding regression line to the scatter plot and extracting slope
-
-
+	
 
 	
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -358,17 +373,17 @@ if __name__ == "__main__":
 
 	elif mode == "2":
 		input_params = set_params() # tuple of grid_size, fire_fq_denom, num_gens
-
+		print(f"\nNumber of parameter sets to run: {len(input_params)}")
 		# run a new simulation for every set of params
 		for (grid_size, fire_fq_denom, num_gens) in input_params:
-			analysis_mode = input("\nRun new simulation instead of using previous simulation output for analysis? [y/n]: ")
+			print("\n-------------------------------------------------------------------------------------")
+			analysis_mode = input(f"\nParameter set to run:\n\tGrid size \t\t: {grid_size}\n\tSparking frequency \t: {1/fire_fq_denom}\n\tNo. of generations \t: {num_gens}\n\nRun new simulation instead of using previous simulation output for analysis? [y/n]: ")
 			
 			if analysis_mode in "yY":				
 				# run_fast(50, 200, 10000) # test 
 				run_fast(grid_size, fire_fq_denom, num_gens)
 				f = f"../logfiles/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
 				run_analysis(grid_size, fire_fq_denom, num_gens, f)
-
 
 			else:
 				# use old logfiles
