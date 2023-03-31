@@ -1,7 +1,8 @@
 
+
 # Studying the dynamics of forest fires 
 
-This repository contains a cellular automaton simulation of forest fires based on [Malamud et. al, 1998](https://github.com/shw3ta/wildfires/blob/main/references/MalamudTurcotteMorein_ForestFires_Science_1998.pdf) made as the final project for [Introduction to Python](https://github.com/eulerlab/pyclass23) at the University of Tübingen (2022-23), submitted by Shweta Prasad and Weronika Sójka. 
+This repository contains a cellular automaton simulation of forest fires based on [Malamud et. al, 1998](https://github.com/shw3ta/wildfires/blob/main/references/MalamudTurcotteMorein_ForestFires_Science_1998.pdf) made as the final project for [Introduction to Python](https://github.com/eulerlab/pyclass23/blob/main/exams/exam_forest_fires.ipynb) at the University of Tübingen (2022-23), submitted by Shweta Prasad and Weronika Sójka. 
 
 You can find the original problem description on the [course repo](https://github.com/eulerlab/pyclass23/tree/main/exams). 
 
@@ -15,7 +16,19 @@ You can find the original problem description on the [course repo](https://githu
 |   |-- animation_128_0.002_demo_high_res.mp4
 |   `-- animation_128_0.002_demo_low_res.mp4
 |-- logfiles
-|   
+|   `-- old
+|       |-- logfile_0.0005_128_buffer.csv
+|       |-- logfile_0.0005_128_total.csv
+|       |-- logfile_0.002_128_buffer.csv
+|       |-- logfile_0.002_128_total.csv
+|       |-- logfile_0.005_50_buffer.csv
+|       |-- logfile_0.005_50_total.csv
+|       |-- logfile_0.008_128_buffer.csv
+|       `-- logfile_0.008_128_total.csv
+|-- plots
+|   |-- loglog_0.0005_128.png
+|   |-- loglog_0.002_128.png
+|   `-- loglog_0.008_128.png
 |-- references
 |   |-- MalamudTurcotteMorein_ForestFires_Science_1998.pdf
 |   `-- Models_data_mechanisms_Quantifying_wildfire_regime.pdf
@@ -24,7 +37,17 @@ You can find the original problem description on the [course repo](https://githu
 |   `-- simulation.py
 `-- webapp
     `-- home.py
+
 ```
+### Dependencies
+```
+ffmpeg
+PIL
+scipy
+```
+![Example animation output](https://gifyu.com/image/SIfu6)
+![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.0005_128.png)
+
 ### Instructions to run the program on your CLI:
 
 All scripts can be found in [wildfires/scripts](https://github.com/shw3ta/wildfires/tree/main/scripts). 
