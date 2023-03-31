@@ -252,8 +252,8 @@ def run_fast(grid_size, fire_fq_denom, N_s):
 	forest.random_init_trees()
 
 	fire_num = 0
-	f_buffer = os.path.relpath('/logfiles', '/scripts') + f"/logfile_{str(1/fire_fq_denom)}_{grid_size}_buffer.csv"
-	f_total = os.path.relpath('/logfiles', '/scripts') + f"/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
+	f_buffer = os.path.relpath('/logfiles', '/scripts') + f"/logfile_{str(1/fire_fq_denom)}_{grid_size}_{N_s}_buffer.csv"
+	f_total = os.path.relpath('/logfiles', '/scripts') + f"/logfile_{str(1/fire_fq_denom)}_{grid_size}_{N_s}_total.csv"
 	
 	for i in range(N_s):
 
@@ -351,10 +351,10 @@ def run_analysis(grid_size, fire_fq_denom, num_gens, f):
 
 	popt, pcov = curve_fit(expfit, x, y)
 
-	plt.plot(newX, expfit(newX, *popt), label="slope : {1:.3f}.".format(*popt))
+	plt.plot(newX, expfit(newX, *popt), label="slope : {1:.3f}".format(*popt))
 	print("Exponential Fit: y = (a*(x**b))")
 	print("\ta = {0}\n\tb = {1}".format(*popt))
-	plt.title("Non-cumulative frequency-area distribution")
+	plt.title(f"Non-cumulative frequency-area distribution for fires on {grid_size}x{grid_size} grid\nsparking frequency : 1/{fire_fq_denom}\nno. of generations : 10^{int(np.log10(num_gens))}", loc='left')
 	plt.legend()
 	plt.savefig(f"../plots/loglog_{1/fire_fq_denom}_{grid_size}.png", format='png')
 	plt.show()
@@ -382,12 +382,12 @@ if __name__ == "__main__":
 			if analysis_mode in "yY":				
 				# run_fast(50, 200, 10000) # test 
 				run_fast(grid_size, fire_fq_denom, num_gens)
-				f = f"../logfiles/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
+				f = f"../logfiles/logfile_{str(1/fire_fq_denom)}_{grid_size}_{num_gens}_total.csv"
 				run_analysis(grid_size, fire_fq_denom, num_gens, f)
 
 			else:
 				# use old logfiles
-				f = f"../logfiles/old/logfile_{str(1/fire_fq_denom)}_{grid_size}_total.csv"
+				f = f"../logfiles/old/logfile_{str(1/fire_fq_denom)}_{grid_size}_{num_gens}_total.csv"
 				run_analysis(grid_size, fire_fq_denom, num_gens, f)
 	else:
 		print("Invalid mode. Bye.")
