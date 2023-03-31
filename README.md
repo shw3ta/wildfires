@@ -45,9 +45,19 @@ ffmpeg
 PIL
 scipy
 ```
+### Examples
+#### Animation 
+This is a high resolution animation obtained on running the model for $10^5$ generations.
 ![Example animation output](https://s10.gifyu.com/images/example_fire_animation.gif)
 
-<!-- ![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.0005_128.png) -->
+#### Plots produced
+
+Shown below is the plot obtained after running $10^9$ simulations on a grid of dimension $128$ at a sparking frequency of $1/500$. The slope of the line fit is the parameter $\alpha$ that the paper tries to estimate. Looking at the other plots in the ```plots/``` subfolder, we can see that the slopes obtained for each of the scenarios considered in the paper are verifiably close. 
+
+![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.002_128_100000000.png)
+
+
+
 
 ### Instructions to run the program on your CLI:
 
