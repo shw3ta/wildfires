@@ -48,6 +48,7 @@ scipy
 ### Examples
 #### Animation 
 This is a high resolution animation obtained on running the model for $10^5$ generations.
+
 ![Example animation output](https://s10.gifyu.com/images/example_fire_animation.gif)
 
 #### Plots produced
