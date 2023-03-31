@@ -45,7 +45,7 @@ ffmpeg
 PIL
 scipy
 ```
-![Example animation output](https://gifyu.com/image/SIfu6)
+![Example animation output](https://s10.gifyu.com/images/example_fire_animation.gif)
 
 <!-- ![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.0005_128.png) -->
 
