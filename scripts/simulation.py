@@ -22,6 +22,13 @@ np.seterr(divide='ignore')
 
 # defining the forest as a 2-D automaton
 class Forest:
+	'''
+	Args to initialize instance:
+		dimension (int) : size of the 2-D grid to initialize
+		mode (string)	: sets whether or not the instance should run in fast or slow mode
+						  "1" for slow; "2" for fast
+	'''
+	
 	
 	# defining attributes of the forest
 	def __init__(self, dimension, mode):
@@ -39,6 +46,13 @@ class Forest:
 	
 	# function to get the neighbours of a cell of interest, as defined in the paper
 	def get_valid_neighbours(self, cell):
+		'''
+		Args:
+			cell (tuple) : location coordinates of a cell of interest
+
+		Returns:
+			valid_neighbours (list) : list of valid neighbour cells
+		'''
 		
 		row, col = cell[0], cell[1]
 
@@ -103,6 +117,10 @@ class Forest:
 	
 	# simulates fire spread to neighbouring trees
 	def spread_to(self, valid_neighbours):
+		'''
+		Args: 
+			valid_neighbours (list) : list of cells to spread fire to
+		'''
 
 		for (row, col) in valid_neighbours:
 			self.cells[row, col] = 2
@@ -131,6 +149,13 @@ class Forest:
 
 	# function to start a fire at a random location, initiate spread and reset after spread
 	def start_fire(self, fire_loc):	
+		'''
+		Args:
+			fire_loc (tuple) : location on the grid to start fire at
+
+		Returns: (conditinally)
+			area_burnt (dict) : all fires and areas are contained as fireID : area :: key : val pairs
+		'''
 
 		row, col = fire_loc[0], fire_loc[1]
 		# drop match at location
@@ -181,6 +206,11 @@ def set_params():
 
 # function to write fire ID and area burnt to csv
 def dump_logs(area_burnt, f):
+	'''
+	Args:
+		area_burnt (dict) : contains every recorded fire and corresponding area of spread
+		f (string)		  : filename to dump to
+	'''
 
 	# open file with filename passed in f
 	with open(f, "a+", newline='') as logfile:
@@ -198,6 +228,12 @@ def dump_logs(area_burnt, f):
 
 # function to produce a high resolution animation of one whole simulation run
 def animate_high_res(forest, fire_fq_denom):
+	'''
+	Args:
+		forest (object)	: instance of forest grid
+		fire_fq_denom (int)	: 1/sparking frequency
+	'''
+
 	# get grids
 	grids = forest.grids
 
@@ -215,6 +251,12 @@ def animate_high_res(forest, fire_fq_denom):
 
 # function to produce a low resolution animation of one whole simulation run
 def animate_low_res(forest, fire_fq_denom):	
+	'''
+	Args:
+		forest (object)	: instance of forest grid
+		fire_fq_denom (int)	: 1/sparking frequency
+	'''
+
 	# get grids
 	grids = forest.grids	
 
@@ -243,6 +285,13 @@ def animate_low_res(forest, fire_fq_denom):
 # function that runs the simulation without collecting the grid state at every change of state
 # dumps relevant information into logfiles and runs analysis on them to produce the relevant plots.
 def run_fast(grid_size, fire_fq_denom, N_s):
+		'''
+	Args:
+		grid_size (int)		: dimension of the forest grid
+		fire_fq_denom (int)	: 1/sparking frequency
+		N_s (int)			: number of generations the grid is evolved per simulation
+	'''
+
 	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
 	
 	area_burnt, buffer = {}, {}
@@ -290,6 +339,13 @@ def run_fast(grid_size, fire_fq_denom, N_s):
 # function to run the simulation and collect grids
 # then depending on user choice, the appropriate animation is done.
 def run_slow(grid_size, fire_fq_denom, N_s):
+		'''
+	Args:
+		grid_size (int)		: dimension of the forest grid
+		fire_fq_denom (int)	: 1/sparking frequency
+		N_s (int)			: number of generations the grid is evolved per simulation
+	'''
+
 	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
 	
 	# instatiating and initalizing forest grid in animation mode
@@ -321,6 +377,14 @@ def run_slow(grid_size, fire_fq_denom, N_s):
 
 
 def run_analysis(grid_size, fire_fq_denom, num_gens, f):
+		'''
+	Args:
+		grid_size (int)		: dimension of the forest grid
+		fire_fq_denom (int)	: 1/sparking frequency
+		num_gens (int)		: number of generations the grid is evolved per simulation
+		f (string)			: filename of file to run analysis on
+	'''
+
 	print(f"\nRunning analysis...")
 
 	data = pd.read_csv(f, header=None)[1]
