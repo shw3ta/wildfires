@@ -46,7 +46,8 @@ PIL
 scipy
 ```
 ![Example animation output](https://gifyu.com/image/SIfu6)
-![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.0005_128.png)
+
+<!-- ![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.0005_128.png) -->
 
 ### Instructions to run the program on your CLI:
 
