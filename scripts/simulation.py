@@ -285,15 +285,14 @@ def animate_low_res(forest, fire_fq_denom):
 # function that runs the simulation without collecting the grid state at every change of state
 # dumps relevant information into logfiles and runs analysis on them to produce the relevant plots.
 def run_fast(grid_size, fire_fq_denom, N_s):
-		'''
+	'''
 	Args:
 		grid_size (int)		: dimension of the forest grid
 		fire_fq_denom (int)	: 1/sparking frequency
 		N_s (int)			: number of generations the grid is evolved per simulation
 	'''
 
-	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")
-	
+	print(f"\nRunning simulation on grid of dim {grid_size} with fire frequency {1/fire_fq_denom} for {N_s} generations...")	
 	area_burnt, buffer = {}, {}
 
 	# instantiating forest grid in fast mode and initializing
@@ -339,7 +338,7 @@ def run_fast(grid_size, fire_fq_denom, N_s):
 # function to run the simulation and collect grids
 # then depending on user choice, the appropriate animation is done.
 def run_slow(grid_size, fire_fq_denom, N_s):
-		'''
+	'''
 	Args:
 		grid_size (int)		: dimension of the forest grid
 		fire_fq_denom (int)	: 1/sparking frequency
@@ -377,7 +376,7 @@ def run_slow(grid_size, fire_fq_denom, N_s):
 
 
 def run_analysis(grid_size, fire_fq_denom, num_gens, f):
-		'''
+	'''
 	Args:
 		grid_size (int)		: dimension of the forest grid
 		fire_fq_denom (int)	: 1/sparking frequency
