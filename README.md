@@ -17,18 +17,18 @@ You can find the original problem description on the [course repo](https://githu
 |   `-- animation_128_0.002_demo_low_res.mp4
 |-- logfiles
 |   `-- old
-|       |-- logfile_0.0005_128_buffer.csv
-|       |-- logfile_0.0005_128_total.csv
-|       |-- logfile_0.002_128_buffer.csv
-|       |-- logfile_0.002_128_total.csv
+|       |-- logfile_0.0005_128_1000000000_buffer.csv
+|       |-- logfile_0.0005_128_1000000000_total.csv
+|       |-- logfile_0.002_128_1000000000_buffer.csv
+|       |-- logfile_0.002_128_1000000000_total.csv
 |       |-- logfile_0.005_50_buffer.csv
 |       |-- logfile_0.005_50_total.csv
-|       |-- logfile_0.008_128_buffer.csv
-|       `-- logfile_0.008_128_total.csv
+|       |-- logfile_0.008_128_1000000000_buffer.csv
+|       `-- logfile_0.008_128_1000000000_total.csv
 |-- plots
-|   |-- loglog_0.0005_128.png
-|   |-- loglog_0.002_128.png
-|   `-- loglog_0.008_128.png
+|   |-- loglog_0.0005_128_1000000000.png
+|   |-- loglog_0.002_128_1000000000.png
+|   `-- loglog_0.008_128_1000000000.png
 |-- references
 |   |-- MalamudTurcotteMorein_ForestFires_Science_1998.pdf
 |   `-- Models_data_mechanisms_Quantifying_wildfire_regime.pdf
@@ -37,6 +37,7 @@ You can find the original problem description on the [course repo](https://githu
 |   `-- simulation.py
 `-- webapp
     `-- home.py
+
 
 ```
 ### Dependencies
