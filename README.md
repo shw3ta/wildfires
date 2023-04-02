@@ -56,7 +56,7 @@ This is a gif of a portion of a high resolution animation obtained on running th
 
 Shown below is the plot obtained after running $10^9$ simulations on a grid of dimension $128$ at a sparking frequency of $1/500$. The slope of the line fit is the parameter $\alpha$ that the paper tries to estimate. Looking at the other plots in the ```plots/``` subfolder, we can see that the slopes obtained for each of the scenarios considered in the paper are verifiably close. 
 
-![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.002_128_100000000.png)
+![Example output of simulation analysis:](https://github.com/shw3ta/wildfires/blob/main/plots/loglog_0.002_128_1000000000.png)
 
 
 
